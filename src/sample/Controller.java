@@ -12,8 +12,6 @@ import javafx.scene.control.TextField;
 import javafx.scene.paint.Paint;
 import javafx.stage.Stage;
 
-import java.awt.*;
-
 public class Controller {
 
     @FXML
@@ -24,6 +22,24 @@ public class Controller {
 
     @FXML
     private Label statusBar;
+
+    @FXML
+    private TextField name;
+
+    @FXML
+    private TextField uname;
+
+    @FXML
+    private TextField pass;
+
+    @FXML
+    private TextField passAgain;
+
+    @FXML
+    private TextField email;
+
+    @FXML
+    private Label statusBarSgnup;
 
     // All the stages here
     private Stage LoginWindow = new Stage();
@@ -36,8 +52,37 @@ public class Controller {
         LoginWindow.show();
     }
 
-    public void pressSignup(ActionEvent event) {
+    public void pressSignup(ActionEvent event) throws Exception {
         System.out.println("Signup works");
+        Parent root = FXMLLoader.load(getClass().getResource("signup.fxml"));
+        LoginWindow.setTitle("Sign Up Screen");
+        LoginWindow.setScene(new Scene(root, 600, 400));
+        LoginWindow.show();
+    }
+
+    public void ActualSignup(ActionEvent event) {
+        System.out.println("Signup works");
+        String Name = name.getText();
+        String username = uname.getText();
+        String password = pass.getText();
+        String passwordAgain = passAgain.getText();
+        String Email = email.getText();
+        if(!password.equalsIgnoreCase(passwordAgain)) {
+            statusBarSgnup.setText("Status: Passwords don't match, type them again");
+            pass.clear();
+            passAgain.clear();
+            statusBarSgnup.setTextFill(Paint.valueOf("#EC0A0A"));
+        } else if(!Email.contains("@") || !Email.contains(".com")) {
+            statusBarSgnup.setText("Status: Not a valid email, re-enter please");
+            email.clear();
+            statusBarSgnup.setTextFill(Paint.valueOf("#EC0A0A"));
+        } else {
+            System.out.println("Success");
+            statusBarSgnup.setText("Status: Login Successful, Opening your page shortly");
+            statusBarSgnup.setTextFill(Paint.valueOf("#43D61F"));
+            System.out.println(Name + " " + username + " " + password + " " + Email + " ");
+        }
+
     }
 
     public void loginCreds(ActionEvent event) {
@@ -50,7 +95,9 @@ public class Controller {
         } else {
             System.out.println("Failure");
             statusBar.setText("Status: Login Unsuccessful, Try again");
-            statusBar.setTextFill(Paint.valueOf("#43D61F"));
+            userName.clear();
+            passWord.clear();
+            statusBar.setTextFill(Paint.valueOf("#EC0A0A"));
         }
     }
 }
