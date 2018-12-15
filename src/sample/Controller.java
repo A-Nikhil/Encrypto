@@ -28,35 +28,17 @@ import java.util.List;
 public class Controller {
 
     @FXML
-    private Button processLogin;
+    private Button processLogin, SelectImageNote, LOGOUT, signMeUp;
     @FXML
-    private Button signMeUp;
+    private TextField userName, name, uname, email, TitleNote;
     @FXML
-    private TextField userName;
+    private PasswordField passWord, pass, passAgain;
     @FXML
-    private PasswordField passWord;
-    @FXML
-    private Label statusBar;
-    @FXML
-    private TextField name;
-    @FXML
-    private TextField uname;
-    @FXML
-    private TextField pass;
-    @FXML
-    private TextField passAgain;
-    @FXML
-    private TextField email;
-    @FXML
-    private Label statusBarSgnup;
+    private Label statusBar, statusBarSgnup, statusNTS;
     @FXML
     private Button noteToSelf;
     @FXML
     private TextArea messageNote;
-    @FXML
-    private TextField TitleNote;
-    @FXML
-    private Label statusNTS;
     @FXML
     private ImageView imageAreaNote;
 
@@ -79,38 +61,44 @@ public class Controller {
             stmt.close();
             c.close();
 
-            Parent root; Scene scene;
+            Parent root;
+            Scene scene;
             switch (number) {
-                case 1: root = FXMLLoader.load(getClass().getResource("/scenes/login.fxml"));
+                case 1:
+                    root = FXMLLoader.load(getClass().getResource("/scenes/login.fxml"));
                     LoginWindow.setTitle("Login Window");
-                    scene = new Scene(root, 600,400);
+                    scene = new Scene(root, 600, 400);
                     LoginWindow.setScene(scene);
                     LoginWindow.show();
                     break;
-                case 2: root = FXMLLoader.load(getClass().getResource("/scenes/signup.fxml"));
+                case 2:
+                    root = FXMLLoader.load(getClass().getResource("/scenes/signup.fxml"));
                     LoginWindow.setTitle("Login Window");
-                    scene = new Scene(root, 600,400);
+                    scene = new Scene(root, 600, 400);
                     LoginWindow.setScene(scene);
                     LoginWindow.show();
                     break;
-                case 3: closeTheWindow(processLogin);
+                case 3:
+                    closeTheWindow(processLogin);
                     root = FXMLLoader.load(getClass().getResource("/scenes/middle.fxml"));
                     Middle.setTitle("Welcome " + NAME);
-                    scene = new Scene(root, 600,400);
+                    scene = new Scene(root, 600, 400);
                     Middle.setScene(scene);
                     Middle.show();
                     break;
-                case 4: closeTheWindow(signMeUp);
+                case 4:
+                    closeTheWindow(signMeUp);
                     root = FXMLLoader.load(getClass().getResource("/scenes/middle.fxml"));
                     Middle.setTitle("Welcome " + NAME);
-                    scene = new Scene(root, 600,400);
+                    scene = new Scene(root, 600, 400);
                     Middle.setScene(scene);
                     Middle.show();
                     break;
-                case 5: closeTheWindow(noteToSelf);
+                case 5:
+                    closeTheWindow(noteToSelf);
                     root = FXMLLoader.load(getClass().getResource("/scenes/notetoself.fxml"));
                     Processing.setTitle("Hey " + NAME + ", Write a Note to Yourself!");
-                    scene = new Scene(root, 600,400);
+                    scene = new Scene(root, 600, 400);
                     Processing.setScene(scene);
                     Processing.show();
                     break;
@@ -123,6 +111,11 @@ public class Controller {
     private void closeTheWindow(Button requestedButton) {
         Stage stage1 = (Stage) requestedButton.getScene().getWindow();
         stage1.close();
+    }
+
+    public void logout(ActionEvent event) {
+        OpenScenes(1);
+        closeTheWindow(LOGOUT);
     }
 
     public void pressLogin(ActionEvent event) throws Exception {
@@ -145,12 +138,12 @@ public class Controller {
         if (Name == null || username == null || password == null || passwordAgain == null || Email == null) {
             statusBarSgnup.setText("Status: One of the fields is null, FILL IT");
             statusBarSgnup.setTextFill(Paint.valueOf("#EC0A0A"));
-        } else if(!password.equalsIgnoreCase(passwordAgain)) {
+        } else if (!password.equalsIgnoreCase(passwordAgain)) {
             statusBarSgnup.setText("Status: Passwords don't match, type them again");
             pass.clear();
             passAgain.clear();
             statusBarSgnup.setTextFill(Paint.valueOf("#EC0A0A"));
-        } else if(!Email.contains("@") || !Email.contains(".com")) {
+        } else if (!Email.contains("@") || !Email.contains(".com")) {
             statusBarSgnup.setText("Status: Not a valid email, re-enter please");
             email.clear();
             statusBarSgnup.setTextFill(Paint.valueOf("#EC0A0A"));
@@ -205,13 +198,13 @@ public class Controller {
                 String chk1 = login.getString(1);
                 String chk2 = login.getString(2);
                 name = login.getString(3);
-                if(username.equalsIgnoreCase(chk1) && password.equalsIgnoreCase(chk2)) {
+                if (username.equalsIgnoreCase(chk1) && password.equalsIgnoreCase(chk2)) {
                     found = true;
                     break;
                 }
             }
             stmt.close();
-            if(found) {
+            if (found) {
                 System.out.println("Success");
                 statusBar.setText("Status: Login Successful");
                 statusBar.setTextFill(Paint.valueOf("#43D61F"));
@@ -231,7 +224,7 @@ public class Controller {
                 passWord.clear();
                 statusBar.setTextFill(Paint.valueOf("#EC0A0A"));
             }
-        } catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }
@@ -268,11 +261,15 @@ public class Controller {
         fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Select any Image", extensions));
         File file = fileChooser.showOpenDialog(null);
 
-        if(file != null) {
+        if (file != null) {
             System.out.println("Selected file is : " + file.getAbsolutePath());
             String imagePath = file.toURI().toString();
             Image yourImage = new Image(imagePath);
             imageAreaNote.setImage(yourImage);
+            SelectImageNote.setVisible(false);
+            statusNTS.setText("Status: Working");
+            statusNTS.setTextFill(Paint.valueOf("#43D61F"));
+
         }
     }
 

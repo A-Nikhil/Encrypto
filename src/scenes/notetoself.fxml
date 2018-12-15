@@ -9,21 +9,22 @@
 <?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.AnchorPane?>
 
-<TitledPane animated="false" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" text="Note To Self" xmlns:fx="http://javafx.com/fxml/1" xmlns="http://javafx.com/javafx/10.0.1" fx:controller="sample.Controller">
+<TitledPane animated="false" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="500.0" prefWidth="600.0" text="Note To Self" xmlns="http://javafx.com/javafx/10.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="sample.Controller">
   <content>
     <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
          <children>
             <Label layoutX="56.0" layoutY="111.0" text="Your Selected Image Appears here" />
-            <ImageView fx:id="imageAreaNote" fitHeight="211.0" fitWidth="266.0" layoutX="14.0" layoutY="14.0" pickOnBounds="true" preserveRatio="true" />
-            <Button fx:id="selectImageNote" layoutX="30.0" layoutY="242.0" mnemonicParsing="false" onAction="#selectImageNote" text="Select your Image File" />
-            <TextField fx:id="TitleNote" layoutX="325.0" layoutY="26.0" prefHeight="25.0" prefWidth="251.0" promptText="Enter a Title Here" />
-            <TextArea fx:id="messageNote" layoutX="325.0" layoutY="67.0" prefHeight="279.0" prefWidth="252.0" promptText="Enter your note here" />
-            <Button fx:id="ProceedNote" layoutX="129.0" layoutY="293.0" mnemonicParsing="false" onAction="#proceedNote" text="Proceed with Text and Image" />
-            <ToolBar layoutX="14.0" layoutY="333.0" prefHeight="27.0" prefWidth="307.0">
+            <ImageView fx:id="imageAreaNote" fitHeight="211.0" fitWidth="266.0" layoutX="15.0" layoutY="88.0" pickOnBounds="true" preserveRatio="true" />
+            <Button fx:id="SelectImageNote" layoutX="35.0" layoutY="311.0" mnemonicParsing="false" onAction="#selectImageNote" text="Select your Image File" />
+            <TextField fx:id="TitleNote" layoutX="332.0" layoutY="73.0" prefHeight="25.0" prefWidth="251.0" promptText="Enter a Title Here (compulsory)" />
+            <TextArea fx:id="messageNote" layoutX="332.0" layoutY="114.0" prefHeight="279.0" prefWidth="252.0" promptText="Enter your note here (compulsory)" />
+            <Button fx:id="ProceedNote" layoutX="373.0" layoutY="408.0" mnemonicParsing="false" onAction="#proceedNote" text="Proceed with Text and Image" />
+            <ToolBar layoutX="14.0" layoutY="433.0" prefHeight="27.0" prefWidth="307.0">
                <items>
                   <Label fx:id="statusNTS" prefHeight="17.0" prefWidth="286.0" text="Status: Waiting for Input" />
                </items>
             </ToolBar>
+            <Button fx:id="LOGOUT" layoutX="492.0" layoutY="14.0" mnemonicParsing="false" onAction="#logout" prefHeight="25.0" prefWidth="91.0" text="Logout" />
          </children></AnchorPane>
   </content>
 </TitledPane>
