@@ -14,10 +14,11 @@
             <Label layoutX="14.0" layoutY="61.0" prefHeight="36.0" prefWidth="570.0" text="To send a message, enter the username of the person in the userid column, and press &quot;Send a Message&quot; to proceed" wrapText="true" />
             <Label layoutX="14.0" layoutY="97.0" text="To keep a note to self, click &quot;Note to Self&quot;" />
             <Label layoutX="14.0" layoutY="118.0" text="It's that easy" />
-            <Label fx:id="notifications" layoutX="14.0" layoutY="157.0" text="Notifications" />
-            <Button fx:id="sendAMessage" layoutX="22.0" layoutY="261.0" mnemonicParsing="false" onAction="#sendMessage" text="Send a Message" />
-            <Button fx:id="noteToSelf" layoutX="262.0" layoutY="261.0" mnemonicParsing="false" onAction="#noteTOSelf" text="Note to Self" />
-            <Button fx:id="Inbox" layoutX="478.0" layoutY="261.0" mnemonicParsing="false" onAction="#viewInbox" text="Your Inbox ()" />
+            <Label layoutX="14.0" layoutY="157.0" text="What do you want to do ?" />
+            <Button fx:id="sendAMessage" layoutX="28.0" layoutY="187.0" mnemonicParsing="false" onAction="#sendMessage" text="Send a Message" />
+            <Button fx:id="noteToSelf" layoutX="211.0" layoutY="187.0" mnemonicParsing="false" onAction="#noteTOSelf" text="Note to Self" />
+            <Button fx:id="Inbox" layoutX="358.0" layoutY="187.0" mnemonicParsing="false" onAction="#viewInbox" text="Check Inbox" />
+            <Button fx:id="yourActivity" layoutX="503.0" layoutY="187.0" mnemonicParsing="false" onAction="#viewActivity" text="Your Activity" />
          </children></AnchorPane>
   </content>
 </TitledPane>

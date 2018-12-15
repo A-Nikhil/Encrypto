@@ -10,14 +10,20 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.paint.Paint;
+import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 
+import java.io.File;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.PreparedStatement;
 import java.sql.Statement;
 import java.sql.DriverManager;
+import java.util.ArrayList;
+import java.util.List;
 
 public class Controller {
 
@@ -44,14 +50,35 @@ public class Controller {
     @FXML
     private Label statusBarSgnup;
     @FXML
-    private Button Inbox;
+    private Button noteToSelf;
+    @FXML
+    private TextArea messageNote;
+    @FXML
+    private TextField TitleNote;
+    @FXML
+    private Label statusNTS;
+    @FXML
+    private ImageView imageAreaNote;
 
     // All the stages here
     private Stage LoginWindow = new Stage();
     private Stage Middle = new Stage();
+    private Stage Processing = new Stage();
 
-    private void OpenScenes(int number, String  NAME) {
+    private void OpenScenes(int number) {
         try {
+
+            // Finding the Name
+            String NAME = "";
+            Connection c = DriverManager.getConnection("jdbc:sqlite:D:\\MyProjects\\Encrypto\\db\\Encrypto.db");
+            Statement stmt = c.createStatement();
+            ResultSet naming = stmt.executeQuery("SELECT * FROM CURRENT;");
+            while (naming.next())
+                NAME = naming.getString(1);
+            naming.close();
+            stmt.close();
+            c.close();
+
             Parent root; Scene scene;
             switch (number) {
                 case 1: root = FXMLLoader.load(getClass().getResource("/scenes/login.fxml"));
@@ -66,19 +93,26 @@ public class Controller {
                     LoginWindow.setScene(scene);
                     LoginWindow.show();
                     break;
-                case 3: closeLogin(processLogin);
+                case 3: closeTheWindow(processLogin);
                     root = FXMLLoader.load(getClass().getResource("/scenes/middle.fxml"));
                     Middle.setTitle("Welcome " + NAME);
                     scene = new Scene(root, 600,400);
                     Middle.setScene(scene);
                     Middle.show();
                     break;
-                case 4: closeLogin(signMeUp);
+                case 4: closeTheWindow(signMeUp);
                     root = FXMLLoader.load(getClass().getResource("/scenes/middle.fxml"));
                     Middle.setTitle("Welcome " + NAME);
                     scene = new Scene(root, 600,400);
                     Middle.setScene(scene);
                     Middle.show();
+                    break;
+                case 5: closeTheWindow(noteToSelf);
+                    root = FXMLLoader.load(getClass().getResource("/scenes/notetoself.fxml"));
+                    Processing.setTitle("Hey " + NAME + ", Write a Note to Yourself!");
+                    scene = new Scene(root, 600,400);
+                    Processing.setScene(scene);
+                    Processing.show();
                     break;
             }
         } catch (Exception e) {
@@ -86,19 +120,19 @@ public class Controller {
         }
     }
 
-    private void closeLogin(Button requestedButton) {
+    private void closeTheWindow(Button requestedButton) {
         Stage stage1 = (Stage) requestedButton.getScene().getWindow();
         stage1.close();
     }
 
     public void pressLogin(ActionEvent event) throws Exception {
         System.out.println("Login works");
-        OpenScenes(1, "");
+        OpenScenes(1);
     }
 
     public void pressSignup(ActionEvent event) throws Exception {
         System.out.println("Signup works");
-        OpenScenes(2, "");
+        OpenScenes(2);
     }
 
     public void ActualSignup(ActionEvent event) {
@@ -138,7 +172,15 @@ public class Controller {
                 pstmt.setString(5, Email);
                 pstmt.executeUpdate();
                 pstmt.close();
-                OpenScenes(4,"");
+
+                PreparedStatement insertion = c.prepareStatement("INSERT INTO CURRENT VALUES (?)");
+                insertion.setString(1, Name);
+                insertion.executeUpdate();
+                insertion.close();
+
+                c.close();
+
+                OpenScenes(4);
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -169,13 +211,19 @@ public class Controller {
                 }
             }
             stmt.close();
-            login.close();
             if(found) {
                 System.out.println("Success");
                 statusBar.setText("Status: Login Successful");
                 statusBar.setTextFill(Paint.valueOf("#43D61F"));
+
+                PreparedStatement insertion = c.prepareStatement("INSERT INTO CURRENT VALUES (?)");
+                insertion.setString(1, name);
+                insertion.executeUpdate();
+                insertion.close();
+
                 System.out.println(name);
-                OpenScenes(3, name);
+                OpenScenes(3);
+                c.close();
             } else {
                 System.out.println("Failure");
                 statusBar.setText("Status: Login Unsuccessful, Try again");
@@ -189,14 +237,62 @@ public class Controller {
     }
 
     public void noteTOSelf(ActionEvent event) {
-        // Do Nothing
+        System.out.println("Note to Self works ");
+        OpenScenes(5);
     }
 
     public void sendMessage(ActionEvent event) {
-        // Do Nothing
+        System.out.println("Send Message works");
+        OpenScenes(6);
     }
 
     public void viewInbox(ActionEvent event) {
-        // Do Nothing
+        System.out.println("Inbox works");
+        OpenScenes(7);
+    }
+
+    public void viewActivity(ActionEvent event) {
+        System.out.println("Activity works");
+        OpenScenes(8);
+    }
+
+    public void selectImageNote(ActionEvent event) {
+        List<String> extensions = new ArrayList<>();
+        extensions.add("*.bmp");
+        extensions.add("*.jpg");
+        extensions.add("*.jpeg");
+        extensions.add("*.tiff");
+        extensions.add("*.png");
+
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Select any Image", extensions));
+        File file = fileChooser.showOpenDialog(null);
+
+        if(file != null) {
+            System.out.println("Selected file is : " + file.getAbsolutePath());
+            String imagePath = file.toURI().toString();
+            Image yourImage = new Image(imagePath);
+            imageAreaNote.setImage(yourImage);
+        }
+    }
+
+    public void proceedNote(ActionEvent event) {
+        String title = TitleNote.getText();
+        String message = messageNote.getText();
+        if (title == null) {
+            statusNTS.setText("Status: Title should not be empty");
+            TitleNote.clear();
+            statusNTS.setTextFill(Paint.valueOf("#EC0A0A"));
+        } else if (message == null) {
+            statusNTS.setText("Status: Message should not be empty");
+            messageNote.clear();
+            statusNTS.setTextFill(Paint.valueOf("#EC0A0A"));
+        } else {
+            System.out.println("Working uptill here");
+            System.out.println(title);
+            System.out.println(message);
+            statusNTS.setText("Status: Working");
+            statusNTS.setTextFill(Paint.valueOf("#43D61F"));
+        }
     }
 }
