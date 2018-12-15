@@ -17,6 +17,7 @@ import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 
 import java.io.File;
+import java.io.IOException;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.PreparedStatement;
@@ -27,18 +28,20 @@ import java.util.List;
 
 public class Controller {
 
+    String DBurl = "jdbc:sqlite:D:\\MyProjects\\Encrypto\\db\\Encrypto.db";
+
     @FXML
     private Button processLogin, SelectImageNote, LOGOUT, signMeUp;
     @FXML
-    private TextField userName, name, uname, email, TitleNote;
+    private TextField userName, name, uname, email, TitleNote, toID, TitleSM;
     @FXML
     private PasswordField passWord, pass, passAgain;
     @FXML
-    private Label statusBar, statusBarSgnup, statusNTS;
+    private Label statusBar, statusBarSgnup, statusNTS, statusSM;
     @FXML
     private Button noteToSelf;
     @FXML
-    private TextArea messageNote;
+    private TextArea messageNote, messageSM;
     @FXML
     private ImageView imageAreaNote;
 
@@ -52,7 +55,7 @@ public class Controller {
 
             // Finding the Name
             String NAME = "";
-            Connection c = DriverManager.getConnection("jdbc:sqlite:D:\\MyProjects\\Encrypto\\db\\Encrypto.db");
+            Connection c = DriverManager.getConnection(DBurl);
             Statement stmt = c.createStatement();
             ResultSet naming = stmt.executeQuery("SELECT * FROM CURRENT;");
             while (naming.next())
@@ -98,7 +101,15 @@ public class Controller {
                     closeTheWindow(noteToSelf);
                     root = FXMLLoader.load(getClass().getResource("/scenes/notetoself.fxml"));
                     Processing.setTitle("Hey " + NAME + ", Write a Note to Yourself!");
-                    scene = new Scene(root, 600, 400);
+                    scene = new Scene(root, 600, 500);
+                    Processing.setScene(scene);
+                    Processing.show();
+                    break;
+                case 6:
+                    closeTheWindow(noteToSelf);
+                    root = FXMLLoader.load(getClass().getResource("/scenes/sendmessage.fxml"));
+                    Processing.setTitle("Hey " + NAME + ", Send a Message to Someone!");
+                    scene = new Scene(root, 600, 500);
                     Processing.setScene(scene);
                     Processing.show();
                     break;
@@ -149,7 +160,7 @@ public class Controller {
             statusBarSgnup.setTextFill(Paint.valueOf("#EC0A0A"));
         } else {
             try {
-                Connection c = DriverManager.getConnection("jdbc:sqlite:D:\\MyProjects\\Encrypto\\db\\Encrypto.db");
+                Connection c = DriverManager.getConnection(DBurl);
 
                 // Finding a unique user id
                 Statement stmt = c.createStatement();
@@ -166,8 +177,9 @@ public class Controller {
                 pstmt.executeUpdate();
                 pstmt.close();
 
-                PreparedStatement insertion = c.prepareStatement("INSERT INTO CURRENT VALUES (?)");
+                PreparedStatement insertion = c.prepareStatement("INSERT INTO CURRENT VALUES (?, ?)");
                 insertion.setString(1, Name);
+                insertion.setInt(2, userID);
                 insertion.executeUpdate();
                 insertion.close();
 
@@ -189,15 +201,16 @@ public class Controller {
         String username = userName.getText();
         String password = passWord.getText();
         try {
-            String name = "";
+            String name = ""; int userID = 0;
             boolean found = false;
-            Connection c = DriverManager.getConnection("jdbc:sqlite:D:\\MyProjects\\Encrypto\\db\\Encrypto.db");
+            Connection c = DriverManager.getConnection(DBurl);
             Statement stmt = c.createStatement();
-            ResultSet login = stmt.executeQuery("SELECT USERNAME, PASSWORD, NAME FROM USERS");
+            ResultSet login = stmt.executeQuery("SELECT USERNAME, PASSWORD, NAME, USERID FROM USERS");
             while (login.next()) {
                 String chk1 = login.getString(1);
                 String chk2 = login.getString(2);
                 name = login.getString(3);
+                userID = login.getInt(4);
                 if (username.equalsIgnoreCase(chk1) && password.equalsIgnoreCase(chk2)) {
                     found = true;
                     break;
@@ -209,8 +222,9 @@ public class Controller {
                 statusBar.setText("Status: Login Successful");
                 statusBar.setTextFill(Paint.valueOf("#43D61F"));
 
-                PreparedStatement insertion = c.prepareStatement("INSERT INTO CURRENT VALUES (?)");
+                PreparedStatement insertion = c.prepareStatement("INSERT INTO CURRENT VALUES (?, ?)");
                 insertion.setString(1, name);
+                insertion.setInt(2, userID);
                 insertion.executeUpdate();
                 insertion.close();
 
@@ -249,6 +263,8 @@ public class Controller {
         OpenScenes(8);
     }
 
+    steganography.Encryption Encrypt = new steganography.Encryption();
+
     public void selectImageNote(ActionEvent event) {
         List<String> extensions = new ArrayList<>();
         extensions.add("*.bmp");
@@ -269,11 +285,11 @@ public class Controller {
             SelectImageNote.setVisible(false);
             statusNTS.setText("Status: Working");
             statusNTS.setTextFill(Paint.valueOf("#43D61F"));
-
+            Encrypt.imageLoc = file.getAbsolutePath();
         }
     }
 
-    public void proceedNote(ActionEvent event) {
+    public void proceedNote(ActionEvent event) throws Exception {
         String title = TitleNote.getText();
         String message = messageNote.getText();
         if (title == null) {
@@ -290,6 +306,66 @@ public class Controller {
             System.out.println(message);
             statusNTS.setText("Status: Working");
             statusNTS.setTextFill(Paint.valueOf("#43D61F"));
+
+            int senderID = 0;
+            Connection c = DriverManager.getConnection(DBurl);
+            Statement stmt = c.createStatement();
+            ResultSet resultSet = stmt.executeQuery("SELECT USERID from CURRENT;");
+            while (resultSet.next())
+                senderID = resultSet.getInt(1);
+            stmt.close();
+            c.close();
+
+            Encrypt.text = message;
+            String outputLoc = Encrypt.performOperation(senderID, senderID);
+        }
+    }
+
+    public void proceedMessage(ActionEvent event) {
+        int recID = Integer.parseInt(toID.getText());
+        String title = TitleSM.getText();
+        String message = messageSM.getText();
+
+        try {
+            Connection c = DriverManager.getConnection("");
+            Statement stmt = c.createStatement();
+            ResultSet resultSet = stmt.executeQuery("");
+            if (recID == 0 || resultSet.getInt(1) == 0){
+                statusSM.setText("Status: Invalid USER ID");
+                toID.clear();
+                statusSM.setTextFill(Paint.valueOf("#EC0A0A"));
+            } else if (title == null) {
+                statusSM.setText("Status: Title should not be empty");
+                TitleSM.clear();
+                statusSM.setTextFill(Paint.valueOf("#EC0A0A"));
+            } else if (message == null) {
+                statusSM.setText("Status: Message should not be empty");
+                messageSM.clear();
+                statusSM.setTextFill(Paint.valueOf("#EC0A0A"));
+            } else {
+                System.out.println("Working uptill here");
+                System.out.println(recID);
+                System.out.println(title);
+                System.out.println(message);
+                statusSM.setText("Status: Working");
+                statusSM.setTextFill(Paint.valueOf("#43D61F"));
+
+                int senderID = 0;
+                stmt.close();
+                c.close();
+                c = DriverManager.getConnection(DBurl);
+                stmt = c.createStatement();
+                resultSet = stmt.executeQuery("SELECT USERID from CURRENT;");
+                while (resultSet.next())
+                    senderID = resultSet.getInt(1);
+                stmt.close();
+                c.close();
+
+                Encrypt.text = message;
+                String outputLoc = Encrypt.performOperation(senderID, recID);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 }

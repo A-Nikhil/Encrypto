@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TextArea?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.control.TitledPane?>
+<?import javafx.scene.control.ToolBar?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.AnchorPane?>
+
+<TitledPane animated="false" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="500.0" prefWidth="600.0" text="Send Message" xmlns="http://javafx.com/javafx/10.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="sample.Controller">
+  <content>
+    <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+         <children>
+            <Label layoutX="56.0" layoutY="111.0" text="Your Selected Image Appears here" />
+            <ImageView fx:id="imageAreaNote" fitHeight="211.0" fitWidth="266.0" layoutX="15.0" layoutY="88.0" pickOnBounds="true" preserveRatio="true" />
+            <Button fx:id="SelectImageNote" layoutX="35.0" layoutY="311.0" mnemonicParsing="false" onAction="#selectImageNote" text="Select your Image File" />
+            <TextField fx:id="TitleSM" layoutX="332.0" layoutY="100.0" prefHeight="25.0" prefWidth="251.0" promptText="Enter a Title Here (compulsory)" />
+            <TextArea fx:id="messageSM" layoutX="332.0" layoutY="141.0" prefHeight="279.0" prefWidth="252.0" promptText="Enter your note here (compulsory)" />
+            <Button fx:id="ProceedMessage" layoutX="373.0" layoutY="435.0" mnemonicParsing="false" onAction="#proceedMessage" text="Proceed with Text and Image" />
+            <ToolBar layoutX="14.0" layoutY="433.0" prefHeight="27.0" prefWidth="307.0">
+               <items>
+                  <Label fx:id="statusSM" prefHeight="17.0" prefWidth="286.0" text="Status: Waiting for Input" />
+               </items>
+            </ToolBar>
+            <Button fx:id="LOGOUT" layoutX="492.0" layoutY="14.0" mnemonicParsing="false" onAction="#logout" prefHeight="25.0" prefWidth="91.0" text="Logout" />
+            <TextField fx:id="toID" layoutX="333.0" layoutY="57.0" prefHeight="25.0" prefWidth="251.0" promptText="Username of the Receiver (compulsory)" />
+         </children></AnchorPane>
+  </content>
+</TitledPane>
