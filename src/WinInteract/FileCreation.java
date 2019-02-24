@@ -2,8 +2,9 @@ package WinInteract;
 
 import java.io.File;
 
+@SuppressWarnings("Duplicates")
 public class FileCreation {
-
+    public String filename = "";
     public boolean createFile(int noter) {
         boolean verify = false;
         String filename = "D:\\MyProjects\\Encrypto\\files\\Notes\\" + noter;
@@ -29,7 +30,7 @@ public class FileCreation {
 
     public boolean createFile(int sender, int receiver) {
         boolean verify = false;
-        String filename = "D:\\MyProjects\\Encrypto\\files\\Messages\\" + sender + "_" + receiver;
+        filename = "D:\\MyProjects\\Encrypto\\files\\Messages\\" + sender + "_" + receiver;
         File dir = new File(filename);
         if(!dir.exists()) {
             System.out.println("Creating directory");

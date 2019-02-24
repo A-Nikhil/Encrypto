@@ -1,7 +1,3 @@
-/*
-*
- */
-
 package sample;
 
 import javafx.event.ActionEvent;
@@ -17,7 +13,6 @@ import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 
 import java.io.File;
-import java.io.IOException;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.PreparedStatement;
@@ -26,9 +21,10 @@ import java.sql.DriverManager;
 import java.util.ArrayList;
 import java.util.List;
 
+@SuppressWarnings("Duplicates")
 public class Controller {
 
-    String DBurl = "jdbc:sqlite:D:\\MyProjects\\Encrypto\\db\\Encrypto.db";
+    private String DBurl = "jdbc:sqlite:D:\\MyProjects\\Encrypto\\db\\Encrypto.db";
 
     @FXML
     private Button processLogin, SelectImageNote, LOGOUT, signMeUp;
@@ -49,6 +45,8 @@ public class Controller {
     private Stage LoginWindow = new Stage();
     private Stage Middle = new Stage();
     private Stage Processing = new Stage();
+
+    private String imageLocation = "";
 
     private void OpenScenes(int number) {
         try {
@@ -279,6 +277,7 @@ public class Controller {
 
         if (file != null) {
             System.out.println("Selected file is : " + file.getAbsolutePath());
+            imageLocation = file.getAbsolutePath();
             String imagePath = file.toURI().toString();
             Image yourImage = new Image(imagePath);
             imageAreaNote.setImage(yourImage);
@@ -301,7 +300,6 @@ public class Controller {
             messageNote.clear();
             statusNTS.setTextFill(Paint.valueOf("#EC0A0A"));
         } else {
-            System.out.println("Working uptill here");
             System.out.println(title);
             System.out.println(message);
             statusNTS.setText("Status: Working");
@@ -314,10 +312,19 @@ public class Controller {
             while (resultSet.next())
                 senderID = resultSet.getInt(1);
             stmt.close();
-            c.close();
 
             Encrypt.text = message;
+            Encrypt.imageLoc = imageLocation;
+            Encrypt.title = title;
             String outputLoc = Encrypt.performOperation(senderID, senderID);
+
+            PreparedStatement preparedStatement = c.prepareStatement("INSERT INTO NTS VALUES (?, ?, ?)");
+            preparedStatement.setString(1, Integer.toString(senderID));
+            preparedStatement.setString(2, title);
+            preparedStatement.setString(3, outputLoc);
+            preparedStatement.executeUpdate();
+
+            System.out.println("Completed");
         }
     }
 
@@ -343,7 +350,6 @@ public class Controller {
                 messageSM.clear();
                 statusSM.setTextFill(Paint.valueOf("#EC0A0A"));
             } else {
-                System.out.println("Working uptill here");
                 System.out.println(recID);
                 System.out.println(title);
                 System.out.println(message);
