@@ -8,6 +8,7 @@
 <?import javafx.scene.control.ToolBar?>
 <?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.text.Font?>
 
 <TitledPane animated="false" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="500.0" prefWidth="600.0" text="Note To Self" xmlns="http://javafx.com/javafx/10.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="sample.Controller">
   <content>
@@ -18,7 +19,10 @@
             <Button fx:id="SelectImageNote" layoutX="35.0" layoutY="311.0" mnemonicParsing="false" onAction="#selectImageNote" text="Select your Image File" />
             <TextField fx:id="TitleNote" layoutX="332.0" layoutY="73.0" prefHeight="25.0" prefWidth="251.0" promptText="Enter a Title Here (compulsory)" />
             <TextArea fx:id="messageNote" layoutX="332.0" layoutY="114.0" prefHeight="279.0" prefWidth="252.0" promptText="Enter your note here (compulsory)" />
-            <Button fx:id="ProceedNote" layoutX="373.0" layoutY="408.0" mnemonicParsing="false" onAction="#proceedNote" text="Proceed with Text and Image" />
+            <Button fx:id="ProceedNote" layoutX="373.0" layoutY="408.0" mnemonicParsing="false" onAction="#proceedNote" text="Proceed with Text and Image">
+               <font>
+                  <Font name="Roboto" size="12.0" />
+               </font></Button>
             <ToolBar layoutX="14.0" layoutY="433.0" prefHeight="27.0" prefWidth="307.0">
                <items>
                   <Label fx:id="statusNTS" prefHeight="17.0" prefWidth="286.0" text="Status: Waiting for Input" />

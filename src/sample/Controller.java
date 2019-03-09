@@ -1,5 +1,6 @@
 package sample;
 
+import Procedure.Inbox;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -41,23 +42,37 @@ public class Controller {
     @FXML
     private ImageView imageAreaNote;
 
+    // For Inbox only
+    @FXML
+    private Button view, refreshMessage;
+    @FXML
+    private Label messageList;
+    @FXML
+    private TextField number;
+
     // All the stages here
     private Stage LoginWindow = new Stage();
     private Stage Middle = new Stage();
     private Stage Processing = new Stage();
 
     private String imageLocation = "";
+//    private String usableName = "";
+    private int usableID = 0;
 
     private void OpenScenes(int number) {
         try {
-
             // Finding the Name
             String NAME = "";
             Connection c = DriverManager.getConnection(DBurl);
             Statement stmt = c.createStatement();
             ResultSet naming = stmt.executeQuery("SELECT * FROM CURRENT;");
-            while (naming.next())
+            while (naming.next()) {
                 NAME = naming.getString(1);
+                usableID = naming.getInt(2);
+//                usableName = NAME;
+            }
+            stmt.execute("DROP TABLE CURRENT");
+            stmt.execute("CREATE TABLE CURRENT ( CURRNAME TEXT, CURRID INTEGER);");
             naming.close();
             stmt.close();
             c.close();
@@ -104,13 +119,21 @@ public class Controller {
                     Processing.show();
                     break;
                 case 6:
-                    closeTheWindow(noteToSelf);
+                    closeTheWindow(noteToSelf); // Same button used, since all point to middle
                     root = FXMLLoader.load(getClass().getResource("/scenes/sendmessage.fxml"));
                     Processing.setTitle("Hey " + NAME + ", Send a Message to Someone!");
                     scene = new Scene(root, 600, 500);
                     Processing.setScene(scene);
                     Processing.show();
                     break;
+                case 7:
+                    closeTheWindow(noteToSelf); // Same button used, since all point to middle
+                    root = FXMLLoader.load(getClass().getResource("/scenes/inbox.fxml"));
+                    Processing.setTitle("Hey " + NAME + ", This is your Inbox!");
+                    scene = new Scene(root, 600, 550);
+                    Processing.setScene(scene);
+                    Processing.show();
+
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -373,5 +396,48 @@ public class Controller {
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    private ArrayList<String> fileLocations = new ArrayList<>();
+    public String title;
+    public void refreshIt() {
+        try {
+            String x = ""; String status;
+            int v = 1;
+            Connection c = DriverManager.getConnection(DBurl);
+            Statement messages = c.createStatement();
+            ResultSet resultSet = messages.executeQuery("SELECT USERS.NAME AS SENDER, FILELOC, TITLE, STATUS, RECEIVERID AS READ FROM MESSAGES INNER JOIN USERS ON USERID = SENDERID;");
+            while (resultSet.next()) {
+                if (resultSet.getInt(5) != usableID)
+                    continue;
+                if (resultSet.getInt(4) == 0)
+                    status = "UNREAD";
+                else
+                    status = "READ";
+                x = x.concat(v + ": " + resultSet.getString(3) + " by " + resultSet.getString(1) + " [" + status + "] \n");
+                fileLocations.add(resultSet.getString(2));
+                title = resultSet.getString(3);
+            }
+            view.setVisible(true);
+            number.setVisible(true);
+            messageList.setText(x);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public String messageSimple;
+    public String messageCoded;
+    public String ImageReady;
+    public void viewMessage() {
+        String x = number.getText();
+        if (x.length() == 0) {
+            number.clear();
+            number.setPromptText("Invalid");
+        }
+
+        Inbox inbox = new Inbox();
+        inbox.fileLoc = fileLocations.get((Integer.parseInt(x)) - 1);
+        inbox.runIt(DBurl);
     }
 }

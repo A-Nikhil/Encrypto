@@ -18,7 +18,7 @@ public class Main extends Application {
         primaryStage.show();
 
         //Closing this main Window
-        PauseTransition delay = new PauseTransition(Duration.seconds(15));
+        PauseTransition delay = new PauseTransition(Duration.seconds(20));
         delay.setOnFinished(e -> primaryStage.close());
         delay.play();
     }

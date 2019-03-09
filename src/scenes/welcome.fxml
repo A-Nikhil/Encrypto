@@ -17,7 +17,7 @@
          <children>
             <Label alignment="CENTER" layoutX="36.0" layoutY="14.0" minWidth="-Infinity" prefHeight="43.0" prefWidth="526.0" text="Encrypto" textAlignment="CENTER" textOverrun="CLIP" wrapText="true" AnchorPane.bottomAnchor="446.0" AnchorPane.leftAnchor="36.0" AnchorPane.rightAnchor="38.0" AnchorPane.topAnchor="14.0">
                <font>
-                  <Font name="Rubik-Bold" size="35.0" />
+                  <Font name="Product Sans" size="35.0" />
                </font>
                <effect>
                   <Glow />
