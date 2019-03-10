@@ -1,6 +1,5 @@
 package sample;
 
-import Procedure.Inbox;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -13,12 +12,18 @@ import javafx.scene.paint.Paint;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 
+import java.io.BufferedReader;
+import java.io.EOFException;
+import java.io.FileReader;
+import java.io.IOException;
 import java.io.File;
+
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.PreparedStatement;
 import java.sql.Statement;
 import java.sql.DriverManager;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -50,14 +55,20 @@ public class Controller {
     @FXML
     private TextField number;
 
+    // For Decryption
+    @FXML
+    private Button loadMessage, decryptButton;
+    @FXML
+    private ImageView ImageHere;
+    @FXML
+    private Label MessageHere, sender;
+
     // All the stages here
     private Stage LoginWindow = new Stage();
     private Stage Middle = new Stage();
     private Stage Processing = new Stage();
 
     private String imageLocation = "";
-//    private String usableName = "";
-    private int usableID = 0;
 
     private void OpenScenes(int number) {
         try {
@@ -65,14 +76,10 @@ public class Controller {
             String NAME = "";
             Connection c = DriverManager.getConnection(DBurl);
             Statement stmt = c.createStatement();
-            ResultSet naming = stmt.executeQuery("SELECT * FROM CURRENT;");
+            ResultSet naming = stmt.executeQuery("SELECT CURRNAME, CURRID FROM CURRENT;");
             while (naming.next()) {
                 NAME = naming.getString(1);
-                usableID = naming.getInt(2);
-//                usableName = NAME;
             }
-            stmt.execute("DROP TABLE CURRENT");
-            stmt.execute("CREATE TABLE CURRENT ( CURRNAME TEXT, CURRID INTEGER);");
             naming.close();
             stmt.close();
             c.close();
@@ -133,7 +140,14 @@ public class Controller {
                     scene = new Scene(root, 600, 550);
                     Processing.setScene(scene);
                     Processing.show();
-
+                    break;
+                case 8:
+                    root = FXMLLoader.load(getClass().getResource("/scenes/decryption.fxml"));
+                    Processing.setTitle("Decryption ready");
+                    scene = new Scene(root, 600,500);
+                    Processing.setScene(scene);
+                    Processing.show();
+                    break;
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -281,7 +295,7 @@ public class Controller {
 
     public void viewActivity(ActionEvent event) {
         System.out.println("Activity works");
-        OpenScenes(8);
+        OpenScenes(9);
     }
 
     steganography.Encryption Encrypt = new steganography.Encryption();
@@ -398,46 +412,121 @@ public class Controller {
         }
     }
 
-    private ArrayList<String> fileLocations = new ArrayList<>();
-    public String title;
+    private ArrayList<String> Titles = new ArrayList<>();
+    private String title;
+    private ArrayList<String> SenderNames = new ArrayList<>();
+    private String senderName;
     public void refreshIt() {
         try {
-            String x = ""; String status;
+            String x = ""; String status, usableName = "";
             int v = 1;
             Connection c = DriverManager.getConnection(DBurl);
-            Statement messages = c.createStatement();
-            ResultSet resultSet = messages.executeQuery("SELECT USERS.NAME AS SENDER, FILELOC, TITLE, STATUS, RECEIVERID AS READ FROM MESSAGES INNER JOIN USERS ON USERID = SENDERID;");
+            Statement stmt = c.createStatement();
+            ResultSet naming = stmt.executeQuery("SELECT CURRNAME, CURRID FROM CURRENT;");
+            while (naming.next()) {
+                usableName = naming.getString(1);
+            }
+            System.out.println(usableName);
+            PreparedStatement messages = c.prepareStatement("SELECT SENDERID, FILELOC, TITLE, STATUS, RECEIVERID AS READ FROM MESSAGES INNER JOIN USERS ON USERID = RECEIVERID WHERE USERS.NAME = ?");
+            messages.setString(1, usableName);
+            ResultSet resultSet = messages.executeQuery();
             while (resultSet.next()) {
-                if (resultSet.getInt(5) != usableID)
-                    continue;
                 if (resultSet.getInt(4) == 0)
                     status = "UNREAD";
                 else
                     status = "READ";
-                x = x.concat(v + ": " + resultSet.getString(3) + " by " + resultSet.getString(1) + " [" + status + "] \n");
-                fileLocations.add(resultSet.getString(2));
-                title = resultSet.getString(3);
+                PreparedStatement preparedStatement = c.prepareStatement("SELECT NAME FROM USERS WHERE USERID = ?");
+                preparedStatement.setInt(1, resultSet.getInt(1));
+                naming = preparedStatement.executeQuery();
+                String goodName = naming.getString(1);
+                x = x.concat(v + ": " + resultSet.getString(3) + " by " + goodName + " [" + status + "] \n");
+                Titles.add(resultSet.getString(3));
+                SenderNames.add(goodName);
             }
             view.setVisible(true);
             number.setVisible(true);
+            refreshMessage.setVisible(false);
             messageList.setText(x);
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
-    public String messageSimple;
-    public String messageCoded;
-    public String ImageReady;
+    private String messageSimple;
+    private String messageCoded;
+    private String ImageReady;
+
     public void viewMessage() {
         String x = number.getText();
+        System.out.println(x);
         if (x.length() == 0) {
             number.clear();
             number.setPromptText("Invalid");
         }
+        title = Titles.get((Integer.parseInt(x)) - 1);
+        senderName = SenderNames.get((Integer.parseInt(x)) - 1);
+        System.out.println(title);
+        runIt();
+        System.out.println(messageSimple + " \n" + messageCoded + " \n" + ImageReady);
+        OpenScenes(8);
+    }
 
-        Inbox inbox = new Inbox();
-        inbox.fileLoc = fileLocations.get((Integer.parseInt(x)) - 1);
-        inbox.runIt(DBurl);
+    private ResultSet messageArray;
+    public void loadMessage() {
+        try {
+            Connection c = DriverManager.getConnection(DBurl);
+            PreparedStatement preparedStatement = c.prepareStatement("SELECT FILELOC FROM MESSAGES WHERE TITLE = ?;");
+            preparedStatement.setString(1, title);
+            ResultSet resultSet = preparedStatement.executeQuery();
+            ImageHere.setImage(new Image(resultSet.getString(1)));
+            sender.setText("This is from " + senderName);
+            preparedStatement = c.prepareStatement("SELECT SIMPLE, CODED FROM BKDOORM WHERE TITLE = ?");
+            preparedStatement.setString(1, title);
+            messageArray = preparedStatement.executeQuery();
+            String coded = generator(messageArray.getString(2));
+            MessageHere.setText(coded);
+            loadMessage.setVisible(false);
+            decryptButton.setVisible(true);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void decryptReady() {
+        try {
+            String simple = generator(messageArray.getString(1));
+            MessageHere.setText(simple);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void runIt() {
+        try {
+            Connection c = DriverManager.getConnection(DBurl);
+            PreparedStatement getDeets = c.prepareStatement("SELECT SIMPLE, CODED FROM BKDOORM WHERE TITLE = ?");
+            getDeets.setString(1, title);
+            ResultSet getDetails = getDeets.executeQuery();
+            messageSimple = getDetails.getString(1);
+            messageCoded = getDetails.getString(2);
+            getDeets = c.prepareStatement("SELECT FILELOC FROM MESSAGES WHERE TITLE = ?");
+            getDeets.setString(1, title);
+            ResultSet resultSet = getDeets.executeQuery();
+            ImageReady = resultSet.getString(1);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    private String generator(String filename) throws IOException {
+        BufferedReader reader = new BufferedReader(new FileReader(filename));
+        String x, y = "";
+        try {
+            while ((x = reader.readLine()) != null)
+                y = y.concat(x);
+        } catch (EOFException e) {
+            // end of case
+        }
+        return y;
     }
 }
