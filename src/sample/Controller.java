@@ -1,6 +1,8 @@
 package sample;
 
 import Procedure.Transfer;
+import Procedure.transferNotes;
+
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -25,7 +27,7 @@ import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
-@SuppressWarnings("Duplicates")
+@SuppressWarnings({"Duplicates", "unused"})
 public class Controller {
 
     private String DBurl = "jdbc:sqlite:D:\\MyProjects\\Encrypto\\db\\Encrypto.db";
@@ -61,6 +63,14 @@ public class Controller {
     private ImageView ImageHere;
     @FXML
     private Label MessageHere, sender;
+
+    // For Notes
+    @FXML
+    private Button viewNote, refreshNotes;
+    @FXML
+    private Label noteList;
+    @FXML
+    private TextField numberNote;
 
     // All the stages here
     private Stage LoginWindow = new Stage();
@@ -141,12 +151,19 @@ public class Controller {
                     Processing.show();
                     break;
                 case 8:
-                    root = FXMLLoader.load(getClass().getResource("/scenes/decryption.fxml"));
+                    root = FXMLLoader.load(getClass().getResource("/scenes/decryptionMessage.fxml"));
                     Processing.setTitle("Decryption ready");
                     scene = new Scene(root, 600,500);
                     Processing.setScene(scene);
                     Processing.show();
                     break;
+                case 9:
+                    closeTheWindow(noteToSelf); // Same button used, since all point to middle
+                    root = FXMLLoader.load(getClass().getResource("/scenes/notes.fxml"));
+                    Processing.setTitle("Hey " + NAME + ", These are your Notes!");
+                    scene = new Scene(root, 600, 550);
+                    Processing.setScene(scene);
+                    Processing.show();
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -163,12 +180,12 @@ public class Controller {
         closeTheWindow(LOGOUT);
     }
 
-    public void pressLogin(ActionEvent event) throws Exception {
+    public void pressLogin(ActionEvent event) {
         System.out.println("Login works");
         OpenScenes(1);
     }
 
-    public void pressSignup(ActionEvent event) throws Exception {
+    public void pressSignup(ActionEvent event) {
         System.out.println("Signup works");
         OpenScenes(2);
     }
@@ -292,7 +309,7 @@ public class Controller {
         OpenScenes(7);
     }
 
-    public void viewActivity(ActionEvent event) {
+    public void viewNotesForYou(ActionEvent event) {
         System.out.println("Activity works");
         OpenScenes(9);
     }
@@ -344,7 +361,7 @@ public class Controller {
             int senderID = 0;
             Connection c = DriverManager.getConnection(DBurl);
             Statement stmt = c.createStatement();
-            ResultSet resultSet = stmt.executeQuery("SELECT USERID from CURRENT;");
+            ResultSet resultSet = stmt.executeQuery("SELECT CURRID from CURRENT;");
             while (resultSet.next())
                 senderID = resultSet.getInt(1);
             stmt.close();
@@ -397,7 +414,7 @@ public class Controller {
                 c.close();
                 c = DriverManager.getConnection(DBurl);
                 stmt = c.createStatement();
-                resultSet = stmt.executeQuery("SELECT USERID from CURRENT;");
+                resultSet = stmt.executeQuery("SELECT CURRID from CURRENT;");
                 while (resultSet.next())
                     senderID = resultSet.getInt(1);
                 stmt.close();
@@ -414,7 +431,6 @@ public class Controller {
     private ArrayList<String> Titles = new ArrayList<>();
     private String title;
     private ArrayList<String> SenderNames = new ArrayList<>();
-    private String senderName;
     public void refreshIt() {
         try {
             String x = ""; String status, usableName = "";
@@ -441,6 +457,7 @@ public class Controller {
                 x = x.concat(v + ": " + resultSet.getString(3) + " by " + goodName + " [" + status + "] \n");
                 Titles.add(resultSet.getString(3));
                 SenderNames.add(goodName);
+                v++;
             }
             view.setVisible(true);
             number.setVisible(true);
@@ -463,8 +480,7 @@ public class Controller {
             number.setPromptText("Invalid");
         }
         title = Titles.get((Integer.parseInt(x)) - 1);
-        senderName = SenderNames.get((Integer.parseInt(x)) - 1);
-        Transfer.sender = senderName;
+        Transfer.sender = SenderNames.get((Integer.parseInt(x)) - 1);
         System.out.println(title);
         runIt();
         System.out.println(messageSimple + " \n" + messageCoded + " \n" + ImageReady);
@@ -534,8 +550,46 @@ public class Controller {
             MessageHere.setText(simple);
             MessageHere.setFont(Font.font("Product Sans"));
             MessageHere.setStyle("-fx-font-weight: bold");
+            MessageHere.setStyle("-fx-font-weight: 20px");
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    // For Notes
+    public void refreshNote() {
+        try {
+            String x = "", usableName = "";
+            int v = 1;
+            Connection c = DriverManager.getConnection(DBurl);
+            Statement stmt = c.createStatement();
+            ResultSet naming = stmt.executeQuery("SELECT CURRNAME, CURRID FROM CURRENT;");
+            while (naming.next()) {
+                usableName = naming.getString(1);
+            }
+            System.out.println(usableName);
+            PreparedStatement messages = c.prepareStatement("SELECT TITLE, FILELOC FROM NTS INNER JOIN USERS ON USERS.USERID = NTS.USERID WHERE USERS.NAME = ?;");
+            messages.setString(1, usableName);
+            ResultSet resultSet = messages.executeQuery();
+            Titles.clear();
+            while (resultSet.next()) {
+                Titles.add(resultSet.getString(1));
+                x = x.concat(v + ": " + resultSet.getString(1) + " \n");
+                v++;
+            }
+            viewNote.setVisible(true);
+            numberNote.setVisible(true);
+            refreshNotes.setVisible(false);
+            noteList.setText(x);
+            noteList.setFont(Font.font("Product Sans"));
+            noteList.setStyle("-fx-font-weight: 20px");
+            noteList.setStyle("-fx-font-weight: bold");
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void viewNotes() {
+        // Stay put
     }
 }

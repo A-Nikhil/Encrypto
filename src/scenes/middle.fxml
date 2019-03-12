@@ -5,7 +5,7 @@
 <?import javafx.scene.control.TitledPane?>
 <?import javafx.scene.layout.AnchorPane?>
 
-<TitledPane fx:id="titlePane" animated="false" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" text="Welcome" xmlns:fx="http://javafx.com/fxml/1" xmlns="http://javafx.com/javafx/10.0.1" fx:controller="sample.Controller">
+<TitledPane fx:id="titlePane" animated="false" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" text="Welcome" xmlns="http://javafx.com/javafx/10.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="sample.Controller">
   <content>
     <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
          <children>
@@ -18,7 +18,7 @@
             <Button fx:id="sendAMessage" layoutX="28.0" layoutY="187.0" mnemonicParsing="false" onAction="#sendMessage" text="Send a Message" />
             <Button fx:id="noteToSelf" layoutX="211.0" layoutY="187.0" mnemonicParsing="false" onAction="#noteTOSelf" text="Note to Self" />
             <Button fx:id="Inbox" layoutX="358.0" layoutY="187.0" mnemonicParsing="false" onAction="#viewInbox" text="Check Inbox" />
-            <Button fx:id="yourActivity" layoutX="503.0" layoutY="187.0" mnemonicParsing="false" onAction="#viewActivity" text="Your Activity" />
+            <Button fx:id="yourNotes" layoutX="503.0" layoutY="187.0" mnemonicParsing="false" onAction="#viewNotesForYou" text="Your Notes" />
          </children></AnchorPane>
   </content>
 </TitledPane>
