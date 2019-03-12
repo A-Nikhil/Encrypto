@@ -1,5 +1,6 @@
 package sample;
 
+import Procedure.Transfer;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -9,6 +10,7 @@ import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.paint.Paint;
+import javafx.scene.text.Font;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 
@@ -18,11 +20,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.File;
 
-import java.sql.Connection;
-import java.sql.ResultSet;
-import java.sql.PreparedStatement;
-import java.sql.Statement;
-import java.sql.DriverManager;
+import java.sql.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -31,6 +29,7 @@ import java.util.List;
 public class Controller {
 
     private String DBurl = "jdbc:sqlite:D:\\MyProjects\\Encrypto\\db\\Encrypto.db";
+    private Connection c;
 
     @FXML
     private Button processLogin, SelectImageNote, LOGOUT, signMeUp;
@@ -465,40 +464,11 @@ public class Controller {
         }
         title = Titles.get((Integer.parseInt(x)) - 1);
         senderName = SenderNames.get((Integer.parseInt(x)) - 1);
+        Transfer.sender = senderName;
         System.out.println(title);
         runIt();
         System.out.println(messageSimple + " \n" + messageCoded + " \n" + ImageReady);
         OpenScenes(8);
-    }
-
-    private ResultSet messageArray;
-    public void loadMessage() {
-        try {
-            Connection c = DriverManager.getConnection(DBurl);
-            PreparedStatement preparedStatement = c.prepareStatement("SELECT FILELOC FROM MESSAGES WHERE TITLE = ?;");
-            preparedStatement.setString(1, title);
-            ResultSet resultSet = preparedStatement.executeQuery();
-            ImageHere.setImage(new Image(resultSet.getString(1)));
-            sender.setText("This is from " + senderName);
-            preparedStatement = c.prepareStatement("SELECT SIMPLE, CODED FROM BKDOORM WHERE TITLE = ?");
-            preparedStatement.setString(1, title);
-            messageArray = preparedStatement.executeQuery();
-            String coded = generator(messageArray.getString(2));
-            MessageHere.setText(coded);
-            loadMessage.setVisible(false);
-            decryptButton.setVisible(true);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
-    public void decryptReady() {
-        try {
-            String simple = generator(messageArray.getString(1));
-            MessageHere.setText(simple);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
     }
 
     private void runIt() {
@@ -513,6 +483,14 @@ public class Controller {
             getDeets.setString(1, title);
             ResultSet resultSet = getDeets.executeQuery();
             ImageReady = resultSet.getString(1);
+            resultSet.close();
+            getDeets.close();
+            getDetails.close();
+            System.out.println(messageCoded + " \n" + messageSimple + " \n" + ImageReady + " uptill here");
+
+            Transfer.coded = messageCoded;
+            Transfer.simple = messageSimple;
+            Transfer.theImage = ImageReady;
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -528,5 +506,36 @@ public class Controller {
             // end of case
         }
         return y;
+    }
+
+    public void loadMessage() {
+        try {
+            String ThisImage = Transfer.theImage;
+            String ThisSender = Transfer.sender;
+            String ThisCoded = Transfer.coded;
+            File file = new File(ThisImage);
+            Image image = new Image(file.toURI().toString());
+            ImageHere.setImage(image);
+            // Rest of the screen
+            sender.setText("This is from " + ThisSender);
+            String coded = generator(ThisCoded);
+            MessageHere.setText(coded);
+            loadMessage.setVisible(false);
+            decryptButton.setVisible(true);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void decryptReady() {
+        try {
+            String ThisSimple = Transfer.simple;
+            String simple = generator(ThisSimple);
+            MessageHere.setText(simple);
+            MessageHere.setFont(Font.font("Product Sans"));
+            MessageHere.setStyle("-fx-font-weight: bold");
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 }
