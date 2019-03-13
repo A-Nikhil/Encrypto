@@ -9,14 +9,15 @@ import java.sql.PreparedStatement;
 import java.util.List;
 
 @SuppressWarnings("Duplicates")
-public class WorksNote {
+public class WorksMessage {
+    public String title;
+
     private String fileNameSimple  = "";
     private String fileNameCoded  = "";
-    public String title = "";
 
-    public void Preprocess(List<String> message, int id) {
+    public void Preprocess(List<String> message, int send, int rec) {
         try {
-            fileNameSimple = "D:\\myprojects\\Encrypto\\Verification\\Notes\\Simple\\" + id + "_" + title + ".txt";
+            fileNameSimple = "D:\\myprojects\\Encrypto\\Verification\\Messages\\Simple\\" + send + "_" + rec + "_" + title + ".txt";
             PrintWriter simple = new PrintWriter(new BufferedWriter(new FileWriter(fileNameSimple)));
             for (String x : message)
                 simple.print(x + " ");
@@ -26,9 +27,9 @@ public class WorksNote {
         }
     }
 
-    public void Postprocess(List<String> code, int id) {
+    public void Postprocess(List<String> code, int send, int rec) {
         try {
-            fileNameCoded = "D:\\myprojects\\Encrypto\\Verification\\Notes\\Coded\\" + id + "_" + title + ".txt";
+            fileNameCoded = "D:\\myprojects\\Encrypto\\Verification\\Messages\\Coded\\" + send + "_" + rec + "_" + title + ".txt";
             PrintWriter simple = new PrintWriter(new BufferedWriter(new FileWriter(fileNameCoded)));
             for (String y : code)
                 simple.print(y + " ");
@@ -36,14 +37,14 @@ public class WorksNote {
         } catch (Exception e) {
             e.printStackTrace();
         }
-        AddData(id);
+        AddData(rec);
     }
 
-    private void AddData(int id) {
+    private void AddData(int rec) {
         try {
             Connection c = DriverManager.getConnection("jdbc:sqlite:D:\\MyProjects\\Encrypto\\db\\Encrypto.db");
-            PreparedStatement preparedStatement = c.prepareStatement("INSERT INTO BKDOOR(USERID, TITLE, SIMPLE, CODED) VALUES (?, ?, ?, ?)");
-            preparedStatement.setString(1, Integer.toString(id));
+            PreparedStatement preparedStatement = c.prepareStatement("INSERT INTO BKDOORM(USERID, TITLE, SIMPLE, CODED) VALUES (?, ?, ?, ?)");
+            preparedStatement.setString(1, Integer.toString(rec));
             preparedStatement.setString(2, title);
             preparedStatement.setString(3, fileNameSimple);
             preparedStatement.setString(4, fileNameCoded);

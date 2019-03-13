@@ -1,6 +1,7 @@
 package steganography;
 
 import Procedure.WorksNote;
+import Procedure.WorksMessage;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
@@ -25,7 +26,7 @@ public class Encryption {
     public String performOperation(int senderID, int revID) throws IOException {
         System.out.println(senderID);
         System.out.println(revID);
-        File inputImage = new File("C:\\Users\\USER\\Pictures\\Desktop BG\\AU-wp1.jpg");
+        File inputImage = new File(imageLoc);
         BufferedImage image = ImageIO.read(inputImage);
         System.out.println(image.getHeight());
         System.out.println(image.getWidth());
@@ -59,10 +60,17 @@ public class Encryption {
             finalMessage.add(EncryptThis(' ', senderID, revID));
         }
 
-        WorksNote worksNote = new WorksNote();
-        worksNote.title = title;
-        worksNote.Preprocess(alpha, senderID);
-        worksNote.Postprocess(beta, senderID);
+        if (senderID == revID) {
+            WorksNote worksNote = new WorksNote();
+            worksNote.title = title;
+            worksNote.Preprocess(alpha, senderID);
+            worksNote.Postprocess(beta, senderID);
+        } else {
+            WorksMessage worksMessage = new WorksMessage();
+            worksMessage.title = title;
+            worksMessage.Preprocess(alpha, senderID, revID);
+            worksMessage.Postprocess(beta, senderID, revID);
+        }
         int p1, a1, r1, g1, b1, p2, a2, r2, g2, b2, i = 0, j = 0, c = 0;
         outer:
         while (i < image.getWidth()) {
