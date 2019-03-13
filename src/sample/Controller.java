@@ -72,6 +72,14 @@ public class Controller {
     @FXML
     private TextField numberNote;
 
+    // For Notes Decryption
+    @FXML
+    private ImageView ImageHereNote;
+    @FXML
+    private Label NoteHere;
+    @FXML
+    private Button decryptButtonNote, loadNote;
+
     // All the stages here
     private Stage LoginWindow = new Stage();
     private Stage Middle = new Stage();
@@ -151,6 +159,7 @@ public class Controller {
                     Processing.show();
                     break;
                 case 8:
+                    // Do not close Inbox
                     root = FXMLLoader.load(getClass().getResource("/scenes/decryptionMessage.fxml"));
                     Processing.setTitle("Decryption ready");
                     scene = new Scene(root, 600,500);
@@ -164,6 +173,15 @@ public class Controller {
                     scene = new Scene(root, 600, 550);
                     Processing.setScene(scene);
                     Processing.show();
+                    break;
+                case 10:
+                    // Do not close Notes
+                    root = FXMLLoader.load(getClass().getResource("/scenes/decryptionNote.fxml"));
+                    Processing.setTitle("Decryption ready");
+                    scene = new Scene(root, 600,500);
+                    Processing.setScene(scene);
+                    Processing.show();
+                    break;
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -490,17 +508,17 @@ public class Controller {
     private void runIt() {
         try {
             Connection c = DriverManager.getConnection(DBurl);
-            PreparedStatement getDeets = c.prepareStatement("SELECT SIMPLE, CODED FROM BKDOORM WHERE TITLE = ?");
-            getDeets.setString(1, title);
-            ResultSet getDetails = getDeets.executeQuery();
+            PreparedStatement getDeeds = c.prepareStatement("SELECT SIMPLE, CODED FROM BKDOORM WHERE TITLE = ?");
+            getDeeds.setString(1, title);
+            ResultSet getDetails = getDeeds.executeQuery();
             messageSimple = getDetails.getString(1);
             messageCoded = getDetails.getString(2);
-            getDeets = c.prepareStatement("SELECT FILELOC FROM MESSAGES WHERE TITLE = ?");
-            getDeets.setString(1, title);
-            ResultSet resultSet = getDeets.executeQuery();
+            getDeeds = c.prepareStatement("SELECT FILELOC FROM MESSAGES WHERE TITLE = ?");
+            getDeeds.setString(1, title);
+            ResultSet resultSet = getDeeds.executeQuery();
             ImageReady = resultSet.getString(1);
             resultSet.close();
-            getDeets.close();
+            getDeeds.close();
             getDetails.close();
             System.out.println(messageCoded + " \n" + messageSimple + " \n" + ImageReady + " uptill here");
 
@@ -557,6 +575,9 @@ public class Controller {
     }
 
     // For Notes
+    private String notesCoded;
+    private String notesSimple;
+    private String notesImage;
     public void refreshNote() {
         try {
             String x = "", usableName = "";
@@ -590,6 +611,69 @@ public class Controller {
     }
 
     public void viewNotes() {
-        // Stay put
+        String x = numberNote.getText();
+        System.out.println(x);
+        if (x.length() == 0) {
+            number.clear();
+            number.setPromptText("Invalid");
+        }
+        title = Titles.get((Integer.parseInt(x)) - 1);
+        System.out.println(title);
+        runItNotes();
+        System.out.println(messageSimple + " \n" + messageCoded + " \n" + ImageReady);
+        OpenScenes(10);
+    }
+
+    private void runItNotes() {
+        try {
+            Connection c = DriverManager.getConnection(DBurl);
+            PreparedStatement getDeeds = c.prepareStatement("SELECT SIMPLE, CODED FROM BKDOOR WHERE TITLE = ?");
+            getDeeds.setString(1, title);
+            ResultSet getDetails = getDeeds.executeQuery();
+            messageSimple = getDetails.getString(1);
+            messageCoded = getDetails.getString(2);
+            getDeeds = c.prepareStatement("SELECT FILELOC FROM NTS WHERE TITLE = ?");
+            getDeeds.setString(1, title);
+            ResultSet resultSet = getDeeds.executeQuery();
+            ImageReady = resultSet.getString(1);
+            resultSet.close();
+            getDeeds.close();
+            getDetails.close();
+            transferNotes.coded = notesCoded;
+            transferNotes.simple = notesSimple;
+            transferNotes.theImage = notesImage;
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void loadNote() {
+        try {
+            String ThisImage = transferNotes.theImage;
+            String ThisCoded = transferNotes.coded;
+            // Image
+            File file = new File(ThisImage);
+            Image image = new Image(file.toURI().toString());
+            ImageHereNote.setImage(image);
+            // Rest of the screen
+            String coded = generator(ThisCoded);
+            NoteHere.setText(coded);
+            loadNote.setVisible(true);
+            decryptButtonNote.setVisible(false);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void decryptNote() {
+        try {
+            String ThisSimple = generator(transferNotes.simple);
+            NoteHere.setText(ThisSimple);
+            MessageHere.setFont(Font.font("Product Sans"));
+            MessageHere.setStyle("-fx-font-weight: bold");
+            MessageHere.setStyle("-fx-font-weight: 20px");
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 }

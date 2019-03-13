@@ -12,7 +12,7 @@
          <children>
             <ImageView fx:id="ImageHereNote" fitHeight="325.0" fitWidth="275.0" layoutX="14.0" layoutY="21.0" pickOnBounds="true" preserveRatio="true" />
             <Label fx:id="NoteHere" layoutX="312.0" layoutY="65.0" prefHeight="244.0" prefWidth="275.0" />
-            <Button fx:id="decryptButton" layoutX="421.0" layoutY="321.0" mnemonicParsing="false" onAction="#decryptReady" text="Decrypt" visible="false" />
+            <Button fx:id="decryptButtonNote" layoutX="421.0" layoutY="321.0" mnemonicParsing="false" onAction="#decryptNote" text="Decrypt" visible="false" />
             <Button fx:id="loadNote" layoutX="404.0" layoutY="321.0" mnemonicParsing="false" onAction="#loadNote" text="Load Notes" />
          </children></AnchorPane>
   </content>
