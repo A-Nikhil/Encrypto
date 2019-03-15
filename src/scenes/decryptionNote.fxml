@@ -6,14 +6,16 @@
 <?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.AnchorPane?>
 
-<TitledPane animated="false" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" text="untitled" xmlns="http://javafx.com/javafx/10.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="sample.Controller">
+<TitledPane animated="false" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" text="Notes" xmlns="http://javafx.com/javafx/10.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="sample.Controller">
   <content>
     <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="500.0" prefWidth="600.0">
          <children>
-            <ImageView fx:id="ImageHereNote" fitHeight="325.0" fitWidth="275.0" layoutX="14.0" layoutY="21.0" pickOnBounds="true" preserveRatio="true" />
+            <ImageView fx:id="ImageHereNote" fitHeight="273.0" fitWidth="275.0" layoutX="-1.0" layoutY="14.0" pickOnBounds="true" preserveRatio="true" />
             <Label fx:id="NoteHere" layoutX="312.0" layoutY="65.0" prefHeight="244.0" prefWidth="275.0" />
             <Button fx:id="decryptButtonNote" layoutX="421.0" layoutY="321.0" mnemonicParsing="false" onAction="#decryptNote" text="Decrypt" visible="false" />
             <Button fx:id="loadNote" layoutX="404.0" layoutY="321.0" mnemonicParsing="false" onAction="#loadNote" text="Load Notes" />
+            <Button fx:id="viewImageNote" layoutX="125.0" layoutY="321.0" mnemonicParsing="false" onAction="#openImageNote" text="View Image" />
+            <Button fx:id="openNoteSep" layoutX="433.0" layoutY="321.0" mnemonicParsing="false" onAction="#openTextNote" text="Open Note" visible="false" />
          </children></AnchorPane>
   </content>
 </TitledPane>

@@ -1,15 +1,16 @@
 package Procedure;
 
-import java.sql.*;
+import java.awt.*;
+import java.io.File;
+import java.io.IOException;
 
 @SuppressWarnings("Duplicates")
 public class Inbox {
-    public static void main(String[] args) throws SQLException {
-        Connection c = DriverManager.getConnection("jdbc:sqlite:D:\\MyProjects\\Encrypto\\db\\Transfer.db");
-        PreparedStatement preparedStatement = c.prepareStatement("SELECT FILELOC FROM MESSAGES WHERE TITLE = ?;");
-        String title = "INTRO";
-        preparedStatement.setString(1, title);
-        ResultSet resultSet = preparedStatement.executeQuery();
-        System.out.println(resultSet.getString(1));
+    public static void main(String[] args) throws IOException {
+        String location = "D:\\myprojects\\Encrypto\\files\\Notes\\124\\Wassup.jpg";
+        int x = location.lastIndexOf('\\');
+        String newLocation = location.substring(0, x);
+        System.out.println(newLocation);
+        Desktop.getDesktop().open(new File(newLocation));
     }
 }

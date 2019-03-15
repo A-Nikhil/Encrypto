@@ -9,6 +9,10 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
+import javafx.scene.control.Button;
+import javafx.scene.control.Label;
+import javafx.scene.control.TextArea;
+import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.paint.Paint;
@@ -16,6 +20,7 @@ import javafx.scene.text.Font;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 
+import java.awt.*;
 import java.io.BufferedReader;
 import java.io.EOFException;
 import java.io.FileReader;
@@ -58,7 +63,7 @@ public class Controller {
 
     // For Decryption
     @FXML
-    private Button loadMessage, decryptButton;
+    private Button loadMessage, decryptButton, viewImageMessage, openTextSep;
     @FXML
     private ImageView ImageHere;
     @FXML
@@ -66,7 +71,7 @@ public class Controller {
 
     // For Notes
     @FXML
-    private Button viewNote, refreshNotes;
+    private Button viewNote, refreshNotes, openNoteSep, viewImageNote;
     @FXML
     private Label noteList;
     @FXML
@@ -135,7 +140,7 @@ public class Controller {
                     Middle.show();
                     break;
                 case 5:
-                    closeTheWindow(noteToSelf);
+//                    closeTheWindow(noteToSelf);
                     root = FXMLLoader.load(getClass().getResource("/scenes/notetoself.fxml"));
                     Processing.setTitle("Hey " + NAME + ", Write a Note to Yourself!");
                     scene = new Scene(root, 600, 500);
@@ -143,7 +148,7 @@ public class Controller {
                     Processing.show();
                     break;
                 case 6:
-                    closeTheWindow(noteToSelf); // Same button used, since all point to middle
+//                    closeTheWindow(noteToSelf); // Same button used, since all point to middle
                     root = FXMLLoader.load(getClass().getResource("/scenes/sendmessage.fxml"));
                     Processing.setTitle("Hey " + NAME + ", Send a Message to Someone!");
                     scene = new Scene(root, 600, 500);
@@ -151,7 +156,7 @@ public class Controller {
                     Processing.show();
                     break;
                 case 7:
-                    closeTheWindow(noteToSelf); // Same button used, since all point to middle
+//                    closeTheWindow(noteToSelf); // Same button used, since all point to middle
                     root = FXMLLoader.load(getClass().getResource("/scenes/inbox.fxml"));
                     Processing.setTitle("Hey " + NAME + ", This is your Inbox!");
                     scene = new Scene(root, 600, 550);
@@ -332,7 +337,7 @@ public class Controller {
         OpenScenes(9);
     }
 
-    steganography.Encryption Encrypt = new steganography.Encryption();
+    private steganography.Encryption Encrypt = new steganography.Encryption();
 
     public void selectImageNote(ActionEvent event) {
         List<String> extensions = new ArrayList<>();
@@ -388,12 +393,16 @@ public class Controller {
             Encrypt.imageLoc = imageLocation;
             Encrypt.title = title;
             String outputLoc = Encrypt.performOperation(senderID, senderID);
+            System.out.println("Image saved");
 
             PreparedStatement preparedStatement = c.prepareStatement("INSERT INTO NTS VALUES (?, ?, ?)");
             preparedStatement.setString(1, Integer.toString(senderID));
             preparedStatement.setString(2, title);
             preparedStatement.setString(3, outputLoc);
             preparedStatement.executeUpdate();
+
+            statusNTS.setText("Close Window : Your Note is ready");
+            statusNTS.setTextFill(Paint.valueOf("#FF7D33"));
 
             System.out.println("Completed");
         }
@@ -535,7 +544,7 @@ public class Controller {
         String x, y = "";
         try {
             while ((x = reader.readLine()) != null)
-                y = y.concat(x);
+                y = y.concat(x + "\n");
         } catch (EOFException e) {
             // end of case
         }
@@ -569,9 +578,25 @@ public class Controller {
             MessageHere.setFont(Font.font("Product Sans"));
             MessageHere.setStyle("-fx-font-weight: bold");
             MessageHere.setStyle("-fx-font-weight: 20px");
+            openTextSep.setVisible(true);
+            viewImageMessage.setVisible(true);
+            decryptButton.setVisible(false);
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    public void openTextMessage(ActionEvent event) throws IOException {
+        String location = Transfer.theImage;
+        String command = "notepad.exe " + location;
+        Runtime runtime = Runtime.getRuntime();
+        Process process = runtime.exec(command);
+    }
+
+    public void openImageMessage(ActionEvent event) throws IOException {
+        String location = Transfer.theImage;
+        String newLocation = location.substring(0, location.lastIndexOf('\\'));
+        Desktop.getDesktop().open(new File(newLocation));
     }
 
     // For Notes
@@ -620,7 +645,7 @@ public class Controller {
         title = Titles.get((Integer.parseInt(x)) - 1);
         System.out.println(title);
         runItNotes();
-        System.out.println(messageSimple + " \n" + messageCoded + " \n" + ImageReady);
+        System.out.println(notesSimple + " \n" + notesCoded + " \n" + notesImage);
         OpenScenes(10);
     }
 
@@ -630,12 +655,12 @@ public class Controller {
             PreparedStatement getDeeds = c.prepareStatement("SELECT SIMPLE, CODED FROM BKDOOR WHERE TITLE = ?");
             getDeeds.setString(1, title);
             ResultSet getDetails = getDeeds.executeQuery();
-            messageSimple = getDetails.getString(1);
-            messageCoded = getDetails.getString(2);
+            notesSimple = getDetails.getString(1);
+            notesCoded = getDetails.getString(2);
             getDeeds = c.prepareStatement("SELECT FILELOC FROM NTS WHERE TITLE = ?");
             getDeeds.setString(1, title);
             ResultSet resultSet = getDeeds.executeQuery();
-            ImageReady = resultSet.getString(1);
+            notesImage = resultSet.getString(1);
             resultSet.close();
             getDeeds.close();
             getDetails.close();
@@ -658,8 +683,8 @@ public class Controller {
             // Rest of the screen
             String coded = generator(ThisCoded);
             NoteHere.setText(coded);
-            loadNote.setVisible(true);
-            decryptButtonNote.setVisible(false);
+            loadNote.setVisible(false);
+            decryptButtonNote.setVisible(true);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -669,11 +694,27 @@ public class Controller {
         try {
             String ThisSimple = generator(transferNotes.simple);
             NoteHere.setText(ThisSimple);
-            MessageHere.setFont(Font.font("Product Sans"));
-            MessageHere.setStyle("-fx-font-weight: bold");
-            MessageHere.setStyle("-fx-font-weight: 20px");
+            NoteHere.setFont(Font.font("Product Sans"));
+            NoteHere.setStyle("-fx-font-weight: bold");
+            NoteHere.setStyle("-fx-font-weight: 40px");
+            openNoteSep.setVisible(true);
+            viewImageNote.setVisible(true);
+            decryptButtonNote.setVisible(false);
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    public void openTextNote(ActionEvent event) throws IOException {
+        String location = transferNotes.simple;
+        String command = "notepad.exe " + location;
+        Runtime runtime = Runtime.getRuntime();
+        Process process = runtime.exec(command);
+    }
+
+    public void openImageNote(ActionEvent event) throws IOException {
+        String location = transferNotes.theImage;
+        String newLocation = location.substring(0, location.lastIndexOf('\\'));
+        Desktop.getDesktop().open(new File(newLocation));
     }
 }

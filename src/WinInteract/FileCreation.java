@@ -7,7 +7,7 @@ public class FileCreation {
     public String filename = "";
     public boolean createFile(int noter) {
         boolean verify = false;
-        String filename = "D:\\MyProjects\\Encrypto\\files\\Notes\\" + noter;
+        filename = "D:\\MyProjects\\Encrypto\\files\\Notes\\" + noter;
         File dir = new File(filename);
         if(!dir.exists()) {
             System.out.println("Creating directory");
@@ -51,11 +51,10 @@ public class FileCreation {
         return verify;
     }
 
-    public static void main(String []args) {
-//        Testing here
+//    public static void main(String []args) {
+////        Testing here
 //        FileCreation obj = new FileCreation();
 //        System.out.println(obj.createFile(101));
 //        System.out.println(obj.createFile(101, 123));
-    }
-
+//    }
 }

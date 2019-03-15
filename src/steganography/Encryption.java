@@ -28,6 +28,8 @@ public class Encryption {
         System.out.println(revID);
         File inputImage = new File(imageLoc);
         BufferedImage image = ImageIO.read(inputImage);
+        ImageProcess obj = new ImageProcess();
+        obj.image = image;
         System.out.println(image.getHeight());
         System.out.println(image.getWidth());
 
@@ -35,7 +37,7 @@ public class Encryption {
         WinInteract.FileCreation fileCreate = new WinInteract.FileCreation();
         boolean isCreationSuccess;
         if (senderID == revID)
-            isCreationSuccess = fileCreate.createFile(senderID, senderID);
+            isCreationSuccess = fileCreate.createFile(senderID);
         else
             isCreationSuccess  = fileCreate.createFile(senderID, revID);
         if (isCreationSuccess)
@@ -71,122 +73,16 @@ public class Encryption {
             worksMessage.Preprocess(alpha, senderID, revID);
             worksMessage.Postprocess(beta, senderID, revID);
         }
-        int p1, a1, r1, g1, b1, p2, a2, r2, g2, b2, i = 0, j = 0, c = 0;
-        outer:
-        while (i < image.getWidth()) {
-            while (j < image.getHeight()) {
-                p1 = image.getRGB(i, j);
-                a1 = (p1 % 0xff000000) >> 24;
-                r1 = (p1 & 0x00ff0000) >> 16;
-                g1 = (p1 & 0x0000ff00) >> 8;
-                b1 = p1 & 0x000000ff;
 
-                p2 = image.getRGB(i, j + 1);
-                a2 = (p2 % 0xff000000) >> 24;
-                r2 = (p2 & 0x00ff0000) >> 16;
-                g2 = (p2 & 0x0000ff00) >> 8;
-                b2 = p2 & 0x000000ff;
+        System.out.println("Going to process Image");
 
-                System.out.println(a1 + " " + r1 + " " + g1 + " " + b1 + " " + a2 + " " + r2 + " " + g2 + " " + b2 + " ");
-                for (int traverse = 0; traverse < 8; traverse++) {
-                    char ch = finalMessage.get(c).charAt(traverse);
-                    System.out.print(ch + " ");
-                    switch (traverse) {
-                        case 0:
-                            if (checkOne(ch)) {
-                                if (!checkOdd(a1))
-                                    a1 += 52;
-                            } else {
-                                if (checkOdd(a1))
-                                    a1 += 52;
-                            }
-                            break;
-
-                        case 1:
-                            if (checkOne(ch)) {
-                                if (!checkOdd(r1))
-                                    r1 += 52;
-                            } else {
-                                if (checkOdd(r1))
-                                    r1 += 52;
-                            }
-                            break;
-
-                        case 2:
-                            if (checkOne(ch)) {
-                                if (!checkOdd(g1))
-                                    g1 += 52;
-                            } else {
-                                if (checkOdd(g1))
-                                    g1 += 52;
-                            }
-                            break;
-
-                        case 3:
-                            if (checkOne(ch)) {
-                                if (!checkOdd(b1))
-                                    b1 += 52;
-                            } else {
-                                if (checkOdd(b1))
-                                    b1 += 52;
-                            }
-                            break;
-
-                        case 4:
-                            if (checkOne(ch)) {
-                                if (!checkOdd(a2))
-                                    a2 += 52;
-                            } else {
-                                if (checkOdd(a2))
-                                    a2 += 52;
-                            }
-                            break;
-
-                        case 5:
-                            if (checkOne(ch)) {
-                                if (!checkOdd(r2))
-                                    r2 += 52;
-                            } else {
-                                if (checkOdd(r2))
-                                    r2 += 52;
-                            }
-                            break;
-
-                        case 6:
-                            if (checkOne(ch)) {
-                                if (!checkOdd(g2))
-                                    g2 += 52;
-                            } else {
-                                if (checkOdd(g2))
-                                    g2 += 52;
-                            }
-                            break;
-
-                        case 7:
-                            if (checkOne(ch)) {
-                                if (!checkOdd(b2))
-                                    b2 += 52;
-                            } else {
-                                if (checkOdd(b2))
-                                    b2 += 52;
-                            }
-                            break;
-                    }
-                }
-                System.out.println();
-                System.out.println(a1 + " " + r1 + " " + g1 + " " + b1 + " " + a2 + " " + r2 + " " + g2 + " " + b2 + " ");
-                c++;
-                if (c == finalMessage.size())
-                    break outer;
-
-                j += 2;
-                if (j>image.getWidth()) {
-                    i++;
-                    j = 0;
-                }
-            }
-        }
-        String outputLoc = fileCreate.filename + "\\" + title +".jpg";
+        System.out.println("saving image");
+        String outputLoc = "D:\\myprojects\\Encrypto\\files\\";
+        if (senderID == revID)
+            outputLoc = outputLoc.concat("Notes\\" + senderID + "\\" +  title + ".jpg");
+        else
+            outputLoc = outputLoc.concat("Messages\\" + senderID + "_" + revID + "\\" +  title + ".jpg");
+        System.out.println("OUTPUT LOCATION : " + outputLoc);
         File outputImage = new File(outputLoc);
         ImageIO.write(image, "jpg", outputImage);
         return outputLoc;
