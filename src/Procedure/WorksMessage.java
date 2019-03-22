@@ -19,8 +19,10 @@ public class WorksMessage {
         try {
             fileNameSimple = "D:\\myprojects\\Encrypto\\Verification\\Messages\\Simple\\" + send + "_" + rec + "_" + title + ".txt";
             PrintWriter simple = new PrintWriter(new BufferedWriter(new FileWriter(fileNameSimple)));
-            for (String x : message)
+            for (String x : message) {
                 simple.print(x + " ");
+                simple.println();
+            }
             simple.close();
         } catch (Exception e) {
             e.printStackTrace();

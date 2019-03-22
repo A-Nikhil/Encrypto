@@ -30,8 +30,10 @@ public class WorksNote {
         try {
             fileNameCoded = "D:\\myprojects\\Encrypto\\Verification\\Notes\\Coded\\" + id + "_" + title + ".txt";
             PrintWriter simple = new PrintWriter(new BufferedWriter(new FileWriter(fileNameCoded)));
-            for (String y : code)
+            for (String y : code) {
                 simple.print(y + " ");
+                simple.println();
+            }
             simple.close();
         } catch (Exception e) {
             e.printStackTrace();

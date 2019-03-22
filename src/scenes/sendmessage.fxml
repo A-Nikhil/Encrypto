@@ -15,7 +15,7 @@
          <children>
             <Label layoutX="56.0" layoutY="111.0" text="Your Selected Image Appears here" />
             <ImageView fx:id="imageAreaNote" fitHeight="211.0" fitWidth="266.0" layoutX="15.0" layoutY="88.0" pickOnBounds="true" preserveRatio="true" />
-            <Button fx:id="SelectImageNote" layoutX="35.0" layoutY="311.0" mnemonicParsing="false" onAction="#selectImageNote" text="Select your Image File" />
+            <Button fx:id="SelectImageNote" layoutX="35.0" layoutY="311.0" mnemonicParsing="false" onAction="#selectImageMessage" text="Select your Image File" />
             <TextField fx:id="TitleSM" layoutX="332.0" layoutY="100.0" prefHeight="25.0" prefWidth="251.0" promptText="Enter a Title Here (compulsory)" />
             <TextArea fx:id="messageSM" layoutX="332.0" layoutY="141.0" prefHeight="279.0" prefWidth="252.0" promptText="Enter your note here (compulsory)" />
             <Button fx:id="ProceedMessage" layoutX="373.0" layoutY="435.0" mnemonicParsing="false" onAction="#proceedMessage" text="Proceed with Text and Image" />

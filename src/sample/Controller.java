@@ -1,8 +1,10 @@
 package sample;
 
+// Other Classes here
 import Procedure.Transfer;
 import Procedure.transferNotes;
 
+// Java FX
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -20,15 +22,25 @@ import javafx.scene.text.Font;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 
-import java.awt.*;
+// Java Abstract Window Toolkit
+import java.awt.Desktop;
+
+// Java I/O
 import java.io.BufferedReader;
 import java.io.EOFException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.File;
 
-import java.sql.*;
+// Java SQL
+import java.sql.Connection;
+import java.sql.Statement;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.DriverManager;
+import java.sql.SQLException;
 
+// Java Utility
 import java.util.ArrayList;
 import java.util.List;
 
@@ -89,6 +101,7 @@ public class Controller {
     private Stage LoginWindow = new Stage();
     private Stage Middle = new Stage();
     private Stage Processing = new Stage();
+    private Stage FinalStage = new Stage();
 
     private String imageLocation = "";
 
@@ -166,10 +179,10 @@ public class Controller {
                 case 8:
                     // Do not close Inbox
                     root = FXMLLoader.load(getClass().getResource("/scenes/decryptionMessage.fxml"));
-                    Processing.setTitle("Decryption ready");
+                    FinalStage.setTitle("Decryption ready");
                     scene = new Scene(root, 600,500);
-                    Processing.setScene(scene);
-                    Processing.show();
+                    FinalStage.setScene(scene);
+                    FinalStage.show();
                     break;
                 case 9:
                     closeTheWindow(noteToSelf); // Same button used, since all point to middle
@@ -312,6 +325,7 @@ public class Controller {
                 passWord.clear();
                 statusBar.setTextFill(Paint.valueOf("#EC0A0A"));
             }
+            c.close();
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -364,6 +378,31 @@ public class Controller {
         }
     }
 
+    public void selectImageMessage(ActionEvent event) {
+        List<String> extensions = new ArrayList<>();
+        extensions.add("*.bmp");
+        extensions.add("*.jpg");
+        extensions.add("*.jpeg");
+        extensions.add("*.tiff");
+        extensions.add("*.png");
+
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Select any Image", extensions));
+        File file = fileChooser.showOpenDialog(null);
+
+        if (file != null) {
+            System.out.println("Selected file is : " + file.getAbsolutePath());
+            imageLocation = file.getAbsolutePath();
+            String imagePath = file.toURI().toString();
+            Image yourImage = new Image(imagePath);
+            imageAreaNote.setImage(yourImage);
+            SelectImageNote.setVisible(false);
+            statusSM.setText("Status: Working");
+            statusSM.setTextFill(Paint.valueOf("#43D61F"));
+            Encrypt.imageLoc = file.getAbsolutePath();
+        }
+    }
+
     public void proceedNote(ActionEvent event) throws Exception {
         String title = TitleNote.getText();
         String message = messageNote.getText();
@@ -400,6 +439,7 @@ public class Controller {
             preparedStatement.setString(2, title);
             preparedStatement.setString(3, outputLoc);
             preparedStatement.executeUpdate();
+            c.close();
 
             statusNTS.setText("Close Window : Your Note is ready");
             statusNTS.setTextFill(Paint.valueOf("#FF7D33"));
@@ -409,15 +449,16 @@ public class Controller {
     }
 
     public void proceedMessage(ActionEvent event) {
-        int recID = Integer.parseInt(toID.getText());
+        String recName = toID.getText();
         String title = TitleSM.getText();
         String message = messageSM.getText();
-
+        int recID;
         try {
-            Connection c = DriverManager.getConnection("");
-            Statement stmt = c.createStatement();
-            ResultSet resultSet = stmt.executeQuery("");
-            if (recID == 0 || resultSet.getInt(1) == 0){
+            Connection c = DriverManager.getConnection(DBurl);
+            PreparedStatement preparedStatement = c.prepareStatement("SELECT USERID FROM USERS WHERE USERNAME = ?");
+            preparedStatement.setString(1, recName);
+            ResultSet resultSet = preparedStatement.executeQuery();
+            if (recName == null || recName.length() == 0 || resultSet.getInt(1) == 0){
                 statusSM.setText("Status: Invalid USER ID");
                 toID.clear();
                 statusSM.setTextFill(Paint.valueOf("#EC0A0A"));
@@ -430,6 +471,7 @@ public class Controller {
                 messageSM.clear();
                 statusSM.setTextFill(Paint.valueOf("#EC0A0A"));
             } else {
+                recID = resultSet.getInt(1);
                 System.out.println(recID);
                 System.out.println(title);
                 System.out.println(message);
@@ -437,18 +479,36 @@ public class Controller {
                 statusSM.setTextFill(Paint.valueOf("#43D61F"));
 
                 int senderID = 0;
-                stmt.close();
+                preparedStatement.close();
                 c.close();
                 c = DriverManager.getConnection(DBurl);
-                stmt = c.createStatement();
+                Statement stmt = c.createStatement();
                 resultSet = stmt.executeQuery("SELECT CURRID from CURRENT;");
                 while (resultSet.next())
                     senderID = resultSet.getInt(1);
                 stmt.close();
-                c.close();
 
                 Encrypt.text = message;
+                Encrypt.title = title;
+                Encrypt.imageLoc = imageLocation;
                 String outputLoc = Encrypt.performOperation(senderID, recID);
+
+                System.out.println("Message Image saved");
+
+                PreparedStatement preparedStatement1 = c.prepareStatement("INSERT INTO MESSAGES(SENDERID, RECEIVERID, FILELOC, STATUS, TITLE) VALUES (?, ?, ?, ?, ?);");
+                preparedStatement1.setInt(1, senderID);
+                preparedStatement1.setInt(2, recID);
+                preparedStatement1.setString(3, outputLoc);
+                preparedStatement1.setInt(4, 0);
+                preparedStatement1.setString(5, title);
+                preparedStatement1.executeUpdate();
+                preparedStatement1.close();
+                c.close();
+
+                statusSM.setText("Close Window : Your Message is ready");
+                statusSM.setTextFill(Paint.valueOf("#FF7D33"));
+
+                System.out.println("Completed");
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -469,23 +529,21 @@ public class Controller {
                 usableName = naming.getString(1);
             }
             System.out.println(usableName);
-            PreparedStatement messages = c.prepareStatement("SELECT SENDERID, FILELOC, TITLE, STATUS, RECEIVERID AS READ FROM MESSAGES INNER JOIN USERS ON USERID = RECEIVERID WHERE USERS.NAME = ?");
+            PreparedStatement messages = c.prepareStatement("SELECT SENDERID, FILELOC, TITLE, STATUS, RECEIVERID FROM MESSAGES INNER JOIN USERS ON USERID = RECEIVERID WHERE USERS.NAME = ?");
             messages.setString(1, usableName);
             ResultSet resultSet = messages.executeQuery();
             while (resultSet.next()) {
-                if (resultSet.getInt(4) == 0)
-                    status = "UNREAD";
-                else
-                    status = "READ";
                 PreparedStatement preparedStatement = c.prepareStatement("SELECT NAME FROM USERS WHERE USERID = ?");
                 preparedStatement.setInt(1, resultSet.getInt(1));
                 naming = preparedStatement.executeQuery();
                 String goodName = naming.getString(1);
-                x = x.concat(v + ": " + resultSet.getString(3) + " by " + goodName + " [" + status + "] \n");
+                x = x.concat(v + ": " + resultSet.getString(3) + " by " + goodName + "\n");
                 Titles.add(resultSet.getString(3));
                 SenderNames.add(goodName);
                 v++;
             }
+            resultSet.close();
+            messages.close();
             view.setVisible(true);
             number.setVisible(true);
             refreshMessage.setVisible(false);
@@ -500,21 +558,27 @@ public class Controller {
     private String ImageReady;
 
     public void viewMessage() {
-        String x = number.getText();
-        System.out.println(x);
-        if (x.length() == 0) {
-            number.clear();
-            number.setPromptText("Invalid");
+        try {
+            Connection connection = DriverManager.getConnection(DBurl);
+            String x = number.getText();
+            System.out.println(x);
+            if (x.length() == 0) {
+                number.clear();
+                number.setPromptText("Invalid");
+            }
+            title = Titles.get((Integer.parseInt(x)) - 1);
+            Transfer.sender = SenderNames.get((Integer.parseInt(x)) - 1);
+            System.out.println(title);
+            runIt(title);
+            System.out.println("Run Completed");
+            System.out.println(messageSimple + " \n" + messageCoded + " \n" + ImageReady);
+            OpenScenes(8);
+        } catch (SQLException e) {
+            e.getCause();
         }
-        title = Titles.get((Integer.parseInt(x)) - 1);
-        Transfer.sender = SenderNames.get((Integer.parseInt(x)) - 1);
-        System.out.println(title);
-        runIt();
-        System.out.println(messageSimple + " \n" + messageCoded + " \n" + ImageReady);
-        OpenScenes(8);
     }
 
-    private void runIt() {
+    private void runIt(String title) {
         try {
             Connection c = DriverManager.getConnection(DBurl);
             PreparedStatement getDeeds = c.prepareStatement("SELECT SIMPLE, CODED FROM BKDOORM WHERE TITLE = ?");
@@ -530,12 +594,12 @@ public class Controller {
             getDeeds.close();
             getDetails.close();
             System.out.println(messageCoded + " \n" + messageSimple + " \n" + ImageReady + " uptill here");
-
             Transfer.coded = messageCoded;
             Transfer.simple = messageSimple;
             Transfer.theImage = ImageReady;
+            c.close();
         } catch (Exception e) {
-            e.printStackTrace();
+            e.getCause();
         }
     }
 
@@ -587,7 +651,7 @@ public class Controller {
     }
 
     public void openTextMessage(ActionEvent event) throws IOException {
-        String location = Transfer.theImage;
+        String location = Transfer.simple;
         String command = "notepad.exe " + location;
         Runtime runtime = Runtime.getRuntime();
         Process process = runtime.exec(command);
@@ -630,6 +694,7 @@ public class Controller {
             noteList.setFont(Font.font("Product Sans"));
             noteList.setStyle("-fx-font-weight: 20px");
             noteList.setStyle("-fx-font-weight: bold");
+            c.close();
         } catch (Exception e) {
             e.printStackTrace();
         }
