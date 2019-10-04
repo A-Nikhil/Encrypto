@@ -18,6 +18,7 @@ public class FileCreation {
                 verify = true;
             } catch (SecurityException e) {
                 e.printStackTrace();
+                System.out.println("Directory creation error");
             }
         }
         if (verify)
@@ -41,6 +42,7 @@ public class FileCreation {
                 verify = true;
             } catch (SecurityException e) {
                 e.printStackTrace();
+                System.out.println("Directory creation error");
             }
         }
         if (verify)
